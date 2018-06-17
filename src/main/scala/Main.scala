@@ -16,12 +16,12 @@ object Main extends App {
     }
     try {
         client.login("marmistrz", password, "rocks")
-        
     } catch {
         case _: XmppException => {
             println("login failed")
             System.exit(1)
         }
     }
+
     println("Done")
 }
