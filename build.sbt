@@ -7,4 +7,3 @@ organization := "marmistrz"
 version := "1.0"
 
 libraryDependencies += "rocks.xmpp" % "xmpp-core-client" % "0.7.5"
-
