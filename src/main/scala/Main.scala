@@ -67,5 +67,6 @@ object Main {
     }
 
     Console.err.println("Done, exiting")
+    client.close() // FIXME do that in finally
   }
 }

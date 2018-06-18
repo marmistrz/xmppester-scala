@@ -25,3 +25,5 @@ scalacOptions ++= Seq(
   "-Ywarn-unused",                     // Warn about anything unused.
   "-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
 )
+
+cancelable in Global := true
