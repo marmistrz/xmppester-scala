@@ -1,2 +1,6 @@
 target
 /bin/
+.ensime_cache
+*.log
+password.txt
+.ensime
