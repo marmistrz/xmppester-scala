@@ -33,24 +33,32 @@ object Main {
   def main(args: Array[String]): Unit = {
 
     if (args.length != 2) {
-      Console.err.println("Usage: xmppester remote-jid interval-seconds")
+      Console.err.println("Usage: xmppester remote-jid interval-ms")
       System.exit(1)
     }
     val remotejid = Jid.of(args(0))
     val interval = args(1).toLong
 
     Console.err.println(s"Will send the message to ${remotejid}...")
+    // TODO load from toml
     val client = XmppClient.create("wiuwiu.de")
     client.addInboundMessageListener((event) => {
       val msgjid = event.getMessage.getFrom
       if (remotejid.asBareJid == msgjid.asBareJid) {
+        // FIXME reacts to typing notification
         reacted set true
         Console.err.println(s"${remotejid} reacted, finishing")
       }
     })
 
+    Console.err.println("Connecting...")
     xmppTry(client.connect(), "connection failed")
-    xmppTry(client.login("marmistrz", password, "rocks"), "login failed")
+    Console.err.println("Logging in...")
+    // TODO load from toml
+    // TODO catch authorizationerrors
+    xmppTry(client.login("marmistrz-bot", password, "rocks"), "login failed")
+    Console.err.println("Logged in!")
+    // TODO load from args
     val msg = new Message(remotejid, Message.Type.CHAT, "test")
 
     while (!reacted.get()) {
