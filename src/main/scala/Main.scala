@@ -1,5 +1,7 @@
 import scala.io
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import rocks.xmpp.core.session.XmppClient
 import rocks.xmpp.core.stanza.model.Message
 import rocks.xmpp.core.XmppException
@@ -14,13 +16,15 @@ object Main {
     passwd
   }
 
+  var reacted = new AtomicBoolean(false)
+
   def xmppTry[T](expr: => T, desc: String): T = {
     try {
       expr
     } catch {
       case e: XmppException => {
         val msg = s"Error: ${desc}:\n${e.getMessage}"
-        println(msg)
+        Console.err.println(msg)
         System.exit(1).asInstanceOf[T]
       }
     }
@@ -28,20 +32,32 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    if (args.length != 1) {
-      Console.err.println("Usage: xmppester remote-jid")
+    if (args.length != 2) {
+      Console.err.println("Usage: xmppester remote-jid interval-seconds")
       System.exit(1)
     }
-    val remotejid = args(0)
+    val remotejid = Jid.of(args(0))
+    val interval = args(1).toLong
 
-    println(s"Will send the message to ${remotejid}...")
+    Console.err.println(s"Will send the message to ${remotejid}...")
     val client = XmppClient.create("wiuwiu.de")
+    client.addInboundMessageListener((event) => {
+      val msgjid = event.getMessage.getFrom
+      if (remotejid.asBareJid == msgjid.asBareJid) {
+        reacted set true
+        Console.err.println(s"${remotejid} reacted, finishing")
+      }
+    })
 
     xmppTry(client.connect(), "connection failed")
     xmppTry(client.login("marmistrz", password, "rocks"), "login failed")
-    val msg = new Message(Jid.of(remotejid), Message.Type.CHAT, "test")
-    xmppTry(client send msg, "sending failed")
+    val msg = new Message(remotejid, Message.Type.CHAT, "test")
 
-    println("Done")
+    while (!reacted.get()) {
+      xmppTry(client send msg, "sending failed")
+      Thread.sleep(interval)
+    }
+
+    Console.err.println("Done, exiting")
   }
 }
