@@ -43,9 +43,9 @@ object Main {
     // TODO load from toml
     val client = XmppClient.create("wiuwiu.de")
     client.addInboundMessageListener((event) => {
-      val msgjid = event.getMessage.getFrom
-      if (remotejid.asBareJid == msgjid.asBareJid) {
-        // FIXME reacts to typing notification
+      val msg = event.getMessage
+      val msgjid = msg.getFrom
+      if ((remotejid.asBareJid == msgjid.asBareJid) && (msg.getBody != null)) {
         reacted set true
         Console.err.println(s"${remotejid} reacted, finishing")
       }
