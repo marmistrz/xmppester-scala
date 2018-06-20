@@ -7,6 +7,7 @@ organization := "marmistrz"
 version := "1.0"
 
 libraryDependencies += "rocks.xmpp" % "xmpp-core-client" % "0.7.5"
+libraryDependencies += "io.spray" %%  "spray-json" % "1.3.3"
 
 scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.

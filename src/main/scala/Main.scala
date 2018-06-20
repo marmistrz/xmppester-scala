@@ -1,5 +1,4 @@
-import scala.io
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -9,24 +8,6 @@ import rocks.xmpp.core.XmppException
 import rocks.xmpp.addr.Jid
 
 object Main {
-  implicit class IteratorPlus[T](i: Iterator[T]) {
-    def nextOption: Option[T] = if (i.hasNext) Some(i.next()) else None
-  }
-
-  private def readPassword: Try[String] = {
-    Try {
-      val source = io.Source.fromFile("password.txt")
-      val pwdOption =
-        try source.getLines.nextOption
-        finally source.close()
-      pwdOption match {
-        case Some(p) => p
-        case None =>
-          throw new Exception("file needs to contain at least one line")
-      }
-    }
-  }
-
   var reacted = new AtomicBoolean(false)
 
   def xmppTry[T](expr: => T, desc: String): T = {
@@ -43,24 +24,25 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    if (args.length != 2) {
-      Console.err.println("Usage: xmppester remote-jid interval-ms")
+    if (args.length != 3) {
+      Console.err.println("Usage: xmppester remote-jid interval-minutes message")
       System.exit(1)
     }
     val remotejid = Jid.of(args(0))
-    val interval = args(1).toLong
+    val interval = args(1).toLong * 60 * 1000
+    val msgText = args(2)
 
-    val password = readPassword match {
+    val settings = SettingsLoader.fromFile("xmppester.json") match {
       case Success(pwd) => pwd
       case Failure(e) => {
-        Console.err.println(s"Error reading the password: ${e.getMessage}")
-        System.exit(1).asInstanceOf[String]
+        Console.err.println(s"Error reading the settings: ${e.getMessage}")
+        System.exit(1).asInstanceOf[Settings]
       }
     }
 
     Console.err.println(s"Will send the message to ${remotejid}...")
     // TODO load from toml
-    val client = XmppClient.create("wiuwiu.de")
+    val client = XmppClient.create(settings.server)
     client.addInboundMessageListener((event) => {
       val msg = event.getMessage
       val msgjid = msg.getFrom
@@ -73,12 +55,14 @@ object Main {
     Console.err.println("Connecting...")
     xmppTry(client.connect(), "connection failed")
     Console.err.println("Logging in...")
-    // TODO load from toml
     // TODO catch authorizationerrors
-    xmppTry(client.login("marmistrz-bot", password, "rocks"), "login failed")
+    xmppTry(
+      client.login(settings.username, settings.password, "xmppester"),
+      "login failed"
+    )
     Console.err.println("Logged in!")
     // TODO load from args
-    val msg = new Message(remotejid, Message.Type.CHAT, "test")
+    val msg = new Message(remotejid, Message.Type.CHAT, msgText)
 
     while (!reacted.get()) {
       xmppTry(client send msg, "sending failed")
