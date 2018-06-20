@@ -22,10 +22,10 @@ object Main {
     }
   }
 
-  def main(args: Array[String]): Unit = {
-
+  def main(args: Array[String]): Unit = {  // scalastyle:ignore method.length
     if (args.length != 3) {
-      Console.err.println("Usage: xmppester remote-jid interval-minutes message")
+      Console.err.println(
+        "Usage: xmppester remote-jid interval-minutes message")
       System.exit(1)
     }
     val remotejid = Jid.of(args(0))
@@ -41,17 +41,20 @@ object Main {
     }
 
     Console.err.println(s"Will send the message to ${remotejid}...")
-    // TODO load from toml
     val client = XmppClient.create(settings.server)
+    val currentThread = Thread.currentThread()
     client.addInboundMessageListener((event) => {
       val msg = event.getMessage
       val msgjid = msg.getFrom
       if ((remotejid.asBareJid == msgjid.asBareJid) && (msg.getBody != null)) {
+        currentThread.interrupt()
+        println(s"Listener thread: ${Thread.currentThread}")
         reacted set true
         Console.err.println(s"${remotejid} reacted, finishing")
       }
     })
 
+    println(s"Main thread: ${Thread.currentThread}")
     Console.err.println("Connecting...")
     xmppTry(client.connect(), "connection failed")
     Console.err.println("Logging in...")
@@ -61,12 +64,16 @@ object Main {
       "login failed"
     )
     Console.err.println("Logged in!")
-    // TODO load from args
     val msg = new Message(remotejid, Message.Type.CHAT, msgText)
 
+    // TODO investigate Actors multithreading instead
     while (!reacted.get()) {
       xmppTry(client send msg, "sending failed")
-      Thread.sleep(interval)
+      try {
+        Thread.sleep(interval)
+      } catch {
+        case _: InterruptedException => {}
+      }
     }
 
     Console.err.println("Done, exiting")
