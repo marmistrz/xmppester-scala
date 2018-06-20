@@ -1,4 +1,5 @@
 import scala.io
+import scala.util.{Failure, Success, Try}
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -8,12 +9,22 @@ import rocks.xmpp.core.XmppException
 import rocks.xmpp.addr.Jid
 
 object Main {
-  val password = {
-    val source = io.Source.fromFile("password.txt")
-    // FIXME some better error handling
-    val passwd = try source.getLines.next
-    finally source.close
-    passwd
+  implicit class IteratorPlus[T](i: Iterator[T]) {
+    def nextOption: Option[T] = if (i.hasNext) Some(i.next()) else None
+  }
+
+  private def readPassword: Try[String] = {
+    Try {
+      val source = io.Source.fromFile("password.txt")
+      val pwdOption =
+        try source.getLines.nextOption
+        finally source.close()
+      pwdOption match {
+        case Some(p) => p
+        case None =>
+          throw new Exception("file needs to contain at least one line")
+      }
+    }
   }
 
   var reacted = new AtomicBoolean(false)
@@ -38,6 +49,14 @@ object Main {
     }
     val remotejid = Jid.of(args(0))
     val interval = args(1).toLong
+
+    val password = readPassword match {
+      case Success(pwd) => pwd
+      case Failure(e) => {
+        Console.err.println(s"Error reading the password: ${e.getMessage}")
+        System.exit(1).asInstanceOf[String]
+      }
+    }
 
     Console.err.println(s"Will send the message to ${remotejid}...")
     // TODO load from toml
