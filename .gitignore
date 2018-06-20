@@ -4,3 +4,4 @@ target
 *.log
 password.txt
 .ensime
+xmppester.json
