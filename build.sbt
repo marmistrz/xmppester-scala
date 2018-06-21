@@ -9,6 +9,9 @@ version := "1.0"
 libraryDependencies += "rocks.xmpp" % "xmpp-core-client" % "0.7.5"
 libraryDependencies += "io.spray" %%  "spray-json" % "1.3.3"
 
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+
 scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
   "-explaintypes",                     // Explain type errors in more detail.

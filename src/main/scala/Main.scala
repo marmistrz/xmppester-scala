@@ -22,7 +22,7 @@ object Main {
     }
   }
 
-  def main(args: Array[String]): Unit = {  // scalastyle:ignore method.length
+  def main(args: Array[String]): Unit = { // scalastyle:ignore method.length
     if (args.length != 3) {
       Console.err.println(
         "Usage: xmppester remote-jid interval-minutes message")
