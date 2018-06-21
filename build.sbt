@@ -27,7 +27,16 @@ scalacOptions ++= Seq(
   "-Ywarn-nullary-unit",               // Warn when nullary methods return Unit.
   "-Ywarn-numeric-widen",              // Warn when numerics are widened.
   "-Ywarn-unused",                     // Warn about anything unused.
-  "-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
+  "-Ywarn-value-discard",              // Warn when non-Unit expression results are unused.
 )
 
+
+
+scalacOptions ++= {
+  if (sys.env.get("CI") == Some("true")) {
+    Seq("-Xfatal-warnings")
+  } else {
+    Seq()
+  }
+}
 cancelable in Global := true
