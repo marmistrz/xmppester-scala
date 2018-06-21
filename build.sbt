@@ -31,9 +31,10 @@ scalacOptions ++= Seq(
 )
 
 
-
+val _insideCI = sys.env.get("CI") == Some("true")
+scalastyleFailOnWarning := _insideCI
 scalacOptions ++= {
-  if (sys.env.get("CI") == Some("true")) {
+  if (_insideCI) {
     Seq("-Xfatal-warnings")
   } else {
     Seq()
