@@ -1,3 +1,4 @@
+import util.Success
 import org.scalatest._
 
 class ExampleSpec extends FlatSpec {
