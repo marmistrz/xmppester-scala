@@ -10,6 +10,6 @@ class ExampleSpec extends FlatSpec {
     }
     """
     val conf = new Settings(username = "usr", server = "srv", password = "pwd")
-    assert(SettingsLoader.fromString(str) === conf)
+    assert(SettingsLoader.fromString(str) === Success(conf))
   }
 }

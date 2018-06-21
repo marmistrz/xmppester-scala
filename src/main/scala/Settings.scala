@@ -10,8 +10,8 @@ object SettingsJsonProtocol extends DefaultJsonProtocol {
 object SettingsLoader {
   import SettingsJsonProtocol._
 
-  def fromString(str: String): Settings = {
-    str.parseJson.convertTo[Settings]
+  def fromString(str: String): Try[Settings] = {
+    Try(str.parseJson.convertTo[Settings])
   }
 
   def fromFile(file: String): Try[Settings] = {
@@ -20,7 +20,7 @@ object SettingsLoader {
       val contents =
         try source.getLines mkString "\n"
         finally source.close()
-      fromString(contents)
-    }
+      contents
+    }.flatMap(fromString)
   }
 }
