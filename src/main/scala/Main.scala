@@ -1,5 +1,3 @@
-import scala.util.{Failure, Success}
-
 import java.util.concurrent.atomic.AtomicBoolean
 
 import rocks.xmpp.core.session.XmppClient
@@ -32,10 +30,11 @@ object Main {
     val interval = args(1).toLong * 60 * 1000
     val msgText = args(2)
 
-    val settings = SettingsLoader.fromFile("xmppester.json") match {
-      case Success(pwd) => pwd
-      case Failure(e) => {
-        Console.err.println(s"Error reading the settings: ${e.getMessage}")
+    val settings = SettingsLoader.fromFile("xmppester.conf") match {
+      case Right(pwd) => pwd
+      case Left(e) => {
+        val msg = e.toList.map(a => a.description).mkString(": ")
+        Console.err.println(s"Error reading the settings: ${msg}")
         System.exit(1).asInstanceOf[Settings]
       }
     }

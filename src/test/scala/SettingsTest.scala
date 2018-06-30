@@ -1,16 +1,11 @@
-import util.Success
+import java.nio.file.Paths
 import org.scalatest._
 
-class ExampleSpec extends FlatSpec {
+class SettingsSpec extends FlatSpec {
   "Settings" should "get loaded from config" in {
-    val str = """
-    {
-      "server": "srv",
-      "username": "usr",
-      "password": "pwd"
-    }
-    """
-    val conf = new Settings(username = "usr", server = "srv", password = "pwd")
-    assert(SettingsLoader.fromString(str) === Success(conf))
+    val src = Paths.get(getClass.getResource("example.conf").getPath)
+    val set = SettingsLoader.fromPath(src)
+    val ok = new Settings("uuuu", "ssss", "pppp")
+    assert(Right(ok) === set)
   }
 }

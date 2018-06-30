@@ -1,26 +1,17 @@
-import scala.util.Try
-import spray.json._
+import pureconfig.loadConfig
+import pureconfig.error.ConfigReaderFailures
+import java.nio.file.{Path, Paths}
 
 case class Settings(username: String, server: String, password: String) {}
 
-object SettingsJsonProtocol extends DefaultJsonProtocol {
-  implicit val settingsFormat = jsonFormat3(Settings)
-}
-
 object SettingsLoader {
-  import SettingsJsonProtocol._
+  type SettingsEither = Either[ConfigReaderFailures, Settings];
 
-  def fromString(str: String): Try[Settings] = {
-    Try(str.parseJson.convertTo[Settings])
+  def fromFile(file: String): SettingsEither = {
+    fromPath(Paths.get(file))
   }
 
-  def fromFile(file: String): Try[Settings] = {
-    Try {
-      val source = io.Source.fromFile(file)
-      val contents =
-        try source.getLines mkString "\n"
-        finally source.close()
-      contents
-    }.flatMap(fromString)
+  def fromPath(path: Path): SettingsEither = {
+    loadConfig[Settings](path = path)
   }
 }
