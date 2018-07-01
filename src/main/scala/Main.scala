@@ -5,6 +5,8 @@ import rocks.xmpp.core.stanza.model.Message
 import rocks.xmpp.core.XmppException
 import rocks.xmpp.addr.Jid
 
+import rocks.xmpp.extensions.receipts.{MessageDeliveryReceiptsManager => XEP0184}
+
 object Main {
   var reacted = new AtomicBoolean(false)
 
@@ -41,19 +43,19 @@ object Main {
 
     Console.err.println(s"Will send the message to ${remotejid}...")
     val client = XmppClient.create(settings.server)
-    val currentThread = Thread.currentThread()
+    client.getManager(classOf[XEP0184]).setEnabled(true)
+
+    val mainThread = Thread.currentThread()
     client.addInboundMessageListener((event) => {
       val msg = event.getMessage
       val msgjid = msg.getFrom
       if ((remotejid.asBareJid == msgjid.asBareJid) && (msg.getBody != null)) {
-        currentThread.interrupt()
-        println(s"Listener thread: ${Thread.currentThread}")
+        mainThread.interrupt()
         reacted set true
         Console.err.println(s"${remotejid} reacted, finishing")
       }
     })
 
-    println(s"Main thread: ${Thread.currentThread}")
     Console.err.println("Connecting...")
     xmppTry(client.connect(), "connection failed")
     Console.err.println("Logging in...")
