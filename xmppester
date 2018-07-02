@@ -1,5 +1,6 @@
 #!/bin/sh
 
-XMPPESTER_ROOT=$HOME/.local/share/xmppester/
-JARNAME=xmppester.jar
+VERSION=0.1
+XMPPESTER_ROOT=/usr/local/share/xmppester/
+JARNAME="xmppester-$VERSION.jar"
 java -jar "$XMPPESTER_ROOT/$JARNAME" "$@"
