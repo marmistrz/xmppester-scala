@@ -10,7 +10,6 @@ libraryDependencies += "rocks.xmpp" % "xmpp-core-client" % "0.7.5"
 libraryDependencies += "rocks.xmpp" % "xmpp-extensions-client" % "0.7.5"
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.7.2"
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
 scalacOptions ++= Seq(
