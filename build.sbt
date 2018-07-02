@@ -4,7 +4,7 @@ scalaVersion := "2.12.4"
 
 name := "xmppester"
 organization := "marmistrz"
-version := "1.0"
+version := "0.1"
 
 libraryDependencies += "rocks.xmpp" % "xmpp-core-client" % "0.7.5"
 libraryDependencies += "rocks.xmpp" % "xmpp-extensions-client" % "0.7.5"
